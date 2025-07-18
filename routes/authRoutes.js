@@ -67,10 +67,21 @@ router.put('/:id', verifyToken, async (req, res) => {
 
 
 // Delete entry
+// ✅ DELETE /api/auth/:id
 router.delete('/:id', verifyToken, async (req, res) => {
-  const entry = await Entry.findOneAndDelete({ _id: req.params.id, owner: req.user.id });
-  if (!entry) return res.status(404).json({ message: 'Entry not found' });
-  res.json({ message: 'Deleted' });
+  try {
+    // ✅ Changed 'owner' to 'userId' to match your schema
+    const entry = await Entry.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+
+    if (!entry) {
+      return res.status(404).json({ message: 'Entry not found or not authorized' });
+    }
+
+    res.json({ message: 'Deleted' }); // ✅ Success response
+  } catch (error) {
+    console.error('Backend delete error:', error);
+    res.status(500).json({ message: 'Server error during delete' });
+  }
 });
 
 
