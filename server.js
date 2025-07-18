@@ -15,7 +15,8 @@ const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'),
 // Log to file
 app.use(morgan('combined', { stream: accessLogStream }));
 app.use(cors({
-  origin: ['https://finance-tracker-plum-seven.vercel.app/'],
+  origin: 'https://finance-tracker-plum-seven.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true // Required for sending cookies or auth headers
 }));
 app.use(express.json());
