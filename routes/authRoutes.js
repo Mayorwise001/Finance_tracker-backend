@@ -20,6 +20,45 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
+// GET profile
+router.get('/profile', verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password'); // exclude password
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ✅ UPDATE User Profile
+router.put('/profile', verifyToken, async (req, res) => {
+  const { username, email, password } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (username) user.username = username;
+    if (email) user.email = email;
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+    }
+
+    await user.save();
+    res.json({ message: 'Profile updated successfully' });
+  } catch (err) {
+    console.error('Update error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+
+
 
 // Create a new entry
 router.post('/', verifyToken, async (req, res) => {
@@ -149,6 +188,9 @@ const hashedPassword = await bcrypt.hash(password, 10); // 🔒 Hash password
     res.status(500).json({ message: 'Server error. Please try again later.' });
   }
 });
+
+
+
 
 
 module.exports = router;
